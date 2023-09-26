@@ -1,4 +1,4 @@
-module gnark-contract-generator
+module github.com/worldcoin/gnark-contract-generator
 
 go 1.20
 

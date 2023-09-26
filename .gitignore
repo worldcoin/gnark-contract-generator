@@ -1,0 +1,4 @@
+.vscode/
+gnark-contract-generator
+*.json
+*.sol
