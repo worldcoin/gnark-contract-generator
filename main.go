@@ -64,7 +64,18 @@ func main() {
 
 					err = readJsonVerifyingKey(vk.(*groth16Bn254.VerifyingKey), vkFile)
 
-					return err
+					if err != nil {
+						log.Fatal().Err(err).Msg("Failed to read verification key.")
+						return err
+					}
+
+					outPath := context.String("out")
+					outFile, err := os.Create(outPath)
+					if err != nil {
+						return err
+					}
+					defer outFile.Close()
+					return vk.ExportSolidity(outFile)
 				},
 			},
 		},
