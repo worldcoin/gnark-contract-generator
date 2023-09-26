@@ -74,11 +74,10 @@ func (g *g2Proj) fromJson(j *g2ProjJson) *g2Proj {
 
 func (g *g2Proj) toAffine() bn254.G2Affine {
 	res := bn254.G2Affine{}
-	if (g.Z).IsZero() {
-		return res
+	if !g.Z.IsZero() {
+		res.X.Div(&g.X, &g.Z)
+		res.Y.Div(&g.Y, &g.Z)
 	}
-	res.X.Div(&g.X, &g.Z)
-	res.Y.Div(&g.Y, &g.Z)
 	return res
 }
 
@@ -95,11 +94,10 @@ func (g *g1Proj) fromJson(j *g1ProjJson) *g1Proj {
 
 func (g *g1Proj) toAffine() bn254.G1Affine {
 	res := bn254.G1Affine{}
-	if g.Z.IsZero() {
-		return res
+	if !g.Z.IsZero() {
+		res.X.Div(&g.X, &g.Z)
+		res.Y.Div(&g.Y, &g.Z)
 	}
-	res.X.Div(&g.X, &g.Z)
-	res.Y.Div(&g.Y, &g.Z)
 	return res
 }
 
