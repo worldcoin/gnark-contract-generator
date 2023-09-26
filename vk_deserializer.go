@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/consensys/gnark-crypto/ecc/bn254/fp"
 	"io"
 
 	"github.com/consensys/gnark-crypto/ecc/bn254"
@@ -60,6 +61,48 @@ type vkJson struct {
 	G1K []g1ProjJson `json:"IC"`
 }
 
+type g2Proj struct {
+	X, Y, Z bn254.E2
+}
+
+func (g *g2Proj) fromJson(j *g2ProjJson) *g2Proj {
+	g.X.SetString(j.coords[0][0], j.coords[0][1])
+	g.Y.SetString(j.coords[1][0], j.coords[1][1])
+	g.Z.SetString(j.coords[2][0], j.coords[2][1])
+	return g
+}
+
+func (g *g2Proj) toAffine() bn254.G2Affine {
+	res := bn254.G2Affine{}
+	if (g.Z).IsZero() {
+		return res
+	}
+	res.X.Div(&g.X, &g.Z)
+	res.Y.Div(&g.Y, &g.Z)
+	return res
+}
+
+type g1Proj struct {
+	X, Y, Z fp.Element
+}
+
+func (g *g1Proj) fromJson(j *g1ProjJson) *g1Proj {
+	g.X.SetString(j.coords[0])
+	g.Y.SetString(j.coords[1])
+	g.Z.SetString(j.coords[2])
+	return g
+}
+
+func (g *g1Proj) toAffine() bn254.G1Affine {
+	res := bn254.G1Affine{}
+	if g.Z.IsZero() {
+		return res
+	}
+	res.X.Div(&g.X, &g.Z)
+	res.Y.Div(&g.Y, &g.Z)
+	return res
+}
+
 func readJsonVerifyingKey(vk *groth16Bn254.VerifyingKey, r io.Reader) error {
 	data, err := io.ReadAll(r)
 
@@ -75,19 +118,15 @@ func readJsonVerifyingKey(vk *groth16Bn254.VerifyingKey, r io.Reader) error {
 		return err
 	}
 
-	vk.G1.Alpha.X.SetString(vkJson.AlphaG1.coords[0])
-	vk.G1.Alpha.Y.SetString(vkJson.AlphaG1.coords[1])
-	vk.G2.Beta.X.SetString(vkJson.BetaG2.coords[0][0], vkJson.BetaG2.coords[0][1])
-	vk.G2.Beta.Y.SetString(vkJson.BetaG2.coords[1][0], vkJson.BetaG2.coords[1][1])
-	vk.G2.Gamma.X.SetString(vkJson.GammaG2.coords[0][0], vkJson.GammaG2.coords[0][1])
-	vk.G2.Gamma.Y.SetString(vkJson.GammaG2.coords[1][0], vkJson.GammaG2.coords[1][1])
-	vk.G2.Delta.X.SetString(vkJson.DeltaG2.coords[0][0], vkJson.DeltaG2.coords[0][1])
-	vk.G2.Delta.Y.SetString(vkJson.DeltaG2.coords[1][0], vkJson.DeltaG2.coords[1][1])
-	vk.G1.K = make([]bn254.G1Affine, len(vkJson.G1K))
+	vk.G1.Alpha = new(g1Proj).fromJson(&vkJson.AlphaG1).toAffine()
 
+	vk.G2.Beta = new(g2Proj).fromJson(&vkJson.BetaG2).toAffine()
+	vk.G2.Gamma = new(g2Proj).fromJson(&vkJson.GammaG2).toAffine()
+	vk.G2.Delta = new(g2Proj).fromJson(&vkJson.DeltaG2).toAffine()
+
+	vk.G1.K = make([]bn254.G1Affine, len(vkJson.G1K))
 	for i := 0; i < len(vkJson.G1K); i++ {
-		vk.G1.K[i].X.SetString(vkJson.G1K[i].coords[0])
-		vk.G1.K[i].Y.SetString(vkJson.G1K[i].coords[1])
+		vk.G1.K[i] = new(g1Proj).fromJson(&vkJson.G1K[i]).toAffine()
 	}
 
 	vk.Precompute()
