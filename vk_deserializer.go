@@ -2,8 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/consensys/gnark-crypto/ecc/bn254/fp"
 	"io"
+
+	"github.com/consensys/gnark-crypto/ecc/bn254/fp"
 
 	"github.com/consensys/gnark-crypto/ecc/bn254"
 	groth16Bn254 "github.com/consensys/gnark/backend/groth16/bn254"
@@ -43,14 +44,10 @@ func readV08VerifyingKey(vk *groth16Bn254.VerifyingKey, r io.Reader) (int64, err
 }
 
 // G1 projective point coordinates
-type g1ProjJson struct {
-	coords [3]string
-}
+type g1ProjJson [3]string
 
 // G2 projective point coordinates
-type g2ProjJson struct {
-	coords [3][2]string
-}
+type g2ProjJson [3][2]string
 
 type vkJson struct {
 	AlphaG1 g1ProjJson `json:"vk_alpha_1"`
@@ -66,9 +63,9 @@ type g2Proj struct {
 }
 
 func (g *g2Proj) fromJson(j *g2ProjJson) *g2Proj {
-	g.X.SetString(j.coords[0][0], j.coords[0][1])
-	g.Y.SetString(j.coords[1][0], j.coords[1][1])
-	g.Z.SetString(j.coords[2][0], j.coords[2][1])
+	g.X.SetString(j[0][0], j[0][1])
+	g.Y.SetString(j[1][0], j[1][1])
+	g.Z.SetString(j[2][0], j[2][1])
 	return g
 }
 
@@ -86,9 +83,9 @@ type g1Proj struct {
 }
 
 func (g *g1Proj) fromJson(j *g1ProjJson) *g1Proj {
-	g.X.SetString(j.coords[0])
-	g.Y.SetString(j.coords[1])
-	g.Z.SetString(j.coords[2])
+	g.X.SetString(j[0])
+	g.Y.SetString(j[1])
+	g.Z.SetString(j[2])
 	return g
 }
 
