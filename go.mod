@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/consensys/gnark v0.9.0-alpha.0.20230901202440-1b3ba0d80acd
-	github.com/consensys/gnark-crypto v0.11.2
+	github.com/consensys/gnark-crypto v0.12.1
 	github.com/rs/zerolog v1.30.0
 	github.com/urfave/cli/v2 v2.25.7
 )
